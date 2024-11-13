@@ -13,11 +13,11 @@ provider "aws" {
   region = "us-east-1"
 }
 
-resource "aws_launch_configuration" "webserver" {
-  image_id        = data.aws_ssm_parameter.webserver-ami.value
-  instance_type   = "t2.micro"
-  security_groups = [aws_security_group.instance.id]
-  user_data = <<-EOF
+resource "aws_launch_template" "webserver" {
+  image_id               = data.aws_ssm_parameter.webserver-ami.value
+  instance_type          = "t2.micro"
+  vpc_security_group_ids = [aws_security_group.instance.id]
+  user_data = base64encode(<<-EOF
             #!/bin/bash
             sleep 20s
             sudo yum update -y
@@ -31,16 +31,18 @@ resource "aws_launch_configuration" "webserver" {
             rm master.zip
             sudo service httpd start
               EOF
-
+  )
   # Required when using a launch configuration with an auto scaling group.
   lifecycle {
     create_before_destroy = true
   }
 }
-
 resource "aws_autoscaling_group" "asg" {
-  launch_configuration = aws_launch_configuration.webserver.name
-  vpc_zone_identifier  = data.aws_subnets.default.ids
+  launch_template {
+    id      = aws_launch_template.webserver.id
+    version = "$Latest"
+  }
+  vpc_zone_identifier = data.aws_subnets.default.ids
 
   target_group_arns = [aws_lb_target_group.asg.arn]
   health_check_type = "ELB"
@@ -64,7 +66,7 @@ resource "aws_security_group" "instance" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  
+
   ingress {
     from_port   = 22
     to_port     = 22
