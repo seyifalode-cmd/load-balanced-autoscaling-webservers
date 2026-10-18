@@ -1,4 +1,8 @@
-**load-balanced-autoscaling-webservers** — Terraform configuration that provisions a production-grade, self-healing web tier on AWS: an Application Load Balancer fronting an Auto Scaling Group of Apache HTTP servers that scale between 2 and 10 instances based on demand.
+# Load-Balanced Auto Scaling Web Servers
+
+Oluwaseyi Michael Falode | Cloud & DevOps Engineering | Toronto, ON
+
+Terraform configuration that provisions a production-grade, self-healing web tier on AWS: an Application Load Balancer fronting an Auto Scaling Group of Apache HTTP servers that scale between 2 and 10 instances based on demand.
 
 ---
 
